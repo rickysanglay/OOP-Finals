@@ -6,6 +6,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Map;
 
@@ -115,77 +116,77 @@ public class VotingView {
     }
 
     private JPanel createMenuPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(new EmptyBorder(30, 30, 30, 30));
+    JPanel panel = new JPanel(new GridBagLayout());
+    panel.setBackground(Color.WHITE);
+    panel.setBorder(new EmptyBorder(30, 30, 30, 30));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10, 0, 10, 0);
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.insets = new Insets(10, 0, 10, 0);
 
-        String[] buttonLabels = {
-                "Register Voter",
-                "Register Candidate",
-                "Cast Vote",
-                "View Candidates",
-                "View Results",
-                "Admin Login",
-                "Exit"
-        };
+    String[] buttonLabels = {
+            "Register Voter",
+            "Cast Vote",
+            "View Candidates",
+            "View Results",
+            "Admin Login",
+            "Exit"
+    };
 
-        for (String label : buttonLabels) {
-            JButton button = createStyledButton(label);
-            button.setToolTipText(label);
+    for (String label : buttonLabels) {
+        JButton button = createStyledButton(label);
+        button.setToolTipText(label);
 
-            if (label.equals("Exit")) {
-                button.setBackground(new Color(220, 53, 69));
-                button.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseEntered(MouseEvent e) {
-                        button.setBackground(new Color(220, 53, 69).brighter());
-                    }
+        if (label.equals("Exit")) {
+            button.setBackground(new Color(220, 53, 69));
+            button.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    button.setBackground(new Color(220, 53, 69).brighter());
+                }
 
-                    @Override
-                    public void mouseExited(MouseEvent e) {
-                        button.setBackground(new Color(220, 53, 69));
-                    }
-                });
-            }
-
-            button.addActionListener(e -> {
-                switch (label) {
-                    case "Register Voter":
-                        cardLayout.show(mainPanel, "Voter");
-                        break;
-                    case "Register Candidate":
-                        cardLayout.show(mainPanel, "Candidate");
-                        break;
-                    case "Cast Vote":
-                        cardLayout.show(mainPanel, "Vote");
-                        break;
-                    case "View Candidates":
-                        cardLayout.show(mainPanel, "CandidatesView");
-                        break;
-                    case "View Results":
-                        cardLayout.show(mainPanel, "Results");
-                        break;
-                    case "Admin Login":
-                        cardLayout.show(mainPanel, "AdminLogin");
-                        break;
-                    case "Exit":
-                        System.exit(0);
-                        break;
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    button.setBackground(new Color(220, 53, 69));
                 }
             });
-
-            panel.add(button, gbc);
         }
 
-        return panel;
+        button.addActionListener(e -> {
+            switch (label) {
+                case "Register Voter":
+                    cardLayout.show(mainPanel, "Voter");
+                    break;
+                case "Cast Vote":
+                    cardLayout.show(mainPanel, "Vote");
+                    break;
+                case "View Candidates":
+                    cardLayout.show(mainPanel, "CandidatesView");
+                    break;
+                case "View Results":
+                    cardLayout.show(mainPanel, "Results");
+                    break;
+                case "Admin Login":
+                    cardLayout.show(mainPanel, "AdminLogin");
+                    break;
+                case "Exit":
+                    System.exit(0);
+                    break;
+            }
+        });
+        panel.add(button, gbc);
     }
+    return panel;
+}
 
-    private JPanel createVoterRegistrationPanel() {
+    private JPanel createGenericFormPanel(
+        String[] labelTexts,        
+        JTextField[] textFields,     
+        String submitButtonText,     
+        ActionListener submitAction, 
+        ActionListener backAction    
+    ) {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -193,42 +194,46 @@ public class VotingView {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.anchor = GridBagConstraints.WEST;
+        for (int i = 0; i < labelTexts.length; i++) {
+            JLabel label = new JLabel(labelTexts[i]);
+            label.setFont(LABEL_FONT);
+            gbc.gridx = 0;
+            gbc.gridy = i;
+            panel.add(label, gbc);
+            gbc.gridx = 1;
+            panel.add(textFields[i], gbc);
+        }
 
-        JLabel nameLabel = new JLabel("Name:");
-        nameLabel.setFont(LABEL_FONT);
-        JTextField nameField = new JTextField(20);
-        nameField.setToolTipText("Enter full name");
-
-        JLabel idLabel = new JLabel("ID Number (8 digits):");
-        idLabel.setFont(LABEL_FONT);
-        JTextField idField = new JTextField(20);
-        idField.setToolTipText("Enter 8-digit ID number");
-
-        JButton submitBtn = createStyledButton("Register");
-        JButton backBtn = createStyledButton("Back");
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(nameLabel, gbc);
-        gbc.gridx = 1;
-        panel.add(nameField, gbc);
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        panel.add(idLabel, gbc);
-        gbc.gridx = 1;
-        panel.add(idField, gbc);
+        JButton submitBtn = createStyledButton(submitButtonText);
+        JButton backBtn = createStyledButton("Back");       
+        submitBtn.addActionListener(submitAction);
+        backBtn.addActionListener(backAction);
 
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = labelTexts.length;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.NONE;
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         buttonPanel.setBackground(Color.WHITE);
         buttonPanel.add(submitBtn);
         buttonPanel.add(backBtn);
+
         panel.add(buttonPanel, gbc);
 
-        submitBtn.addActionListener(e -> {
+        return panel;
+    }
+
+    private JPanel createVoterRegistrationPanel() {
+        String[] labelTexts = {"Name:", "ID Number (8 digits):"};
+        JTextField nameField = new JTextField(20);
+        nameField.setToolTipText("Enter full name");
+        JTextField idField = new JTextField(20);
+        idField.setToolTipText("Enter 8-digit ID number");
+        JTextField[] textFields = {nameField, idField};
+
+        ActionListener registerAction = e -> {
             try {
                 if (nameField.getText().trim().isEmpty()) {
                     throw new VotingException("Name cannot be empty");
@@ -242,12 +247,18 @@ public class VotingView {
                 JOptionPane.showMessageDialog(frame, ex.getMessage(),
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
-        });
-
-        backBtn.addActionListener(e -> cardLayout.show(mainPanel, "Menu"));
-
-        return panel;
+        };
+        ActionListener backAction = e -> cardLayout.show(mainPanel, "Menu");
+        return createGenericFormPanel(
+                labelTexts,
+                textFields,
+                "Register",
+                registerAction, 
+                backAction       
+        );
     }
+
+    
 
     private JPanel createCandidateRegistrationPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
@@ -503,6 +514,7 @@ public class VotingView {
         gbc.insets = new Insets(10, 0, 10, 0);
 
         String[] buttonLabels = {
+                "Register Candidate",
                 "View Voter Information",
                 "View Candidate Information",
                 "View Vote History",
@@ -531,6 +543,9 @@ public class VotingView {
 
             button.addActionListener(e -> {
                 switch (label) {
+                    case "Register Candidate":
+                        cardLayout.show(mainPanel, "Candidates");
+                        break;
                     case "View Voter Information":
                         cardLayout.show(mainPanel, "Voters");
                         break;
@@ -645,7 +660,6 @@ public class VotingView {
 
         return panel;
     }
-
     private JPanel createVoteHistoryPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
